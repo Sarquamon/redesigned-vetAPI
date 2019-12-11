@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 
 const productRoutes = require("./api/routes/products");
 const orderRoutes = require("./api/routes/orders");
+const userRoutes = require("./api/routes/user");
 
 const MONGODBURL = `mongodb+srv://admin:${process.env.MONGODB_ATLAS_PWD}@developmentapps-lmcx2.mongodb.net/test?retryWrites=true&w=majority`;
 
@@ -41,9 +42,10 @@ app.use((req, res, next) => {
 
 app.use("/product", productRoutes);
 app.use("/order", orderRoutes);
+app.use("/user", userRoutes);
 
 app.use((req, res, next) => {
-	const error = new Error("Not found");
+	const error = new Error("Route not found");
 	error.status = 404;
 	next(error);
 });

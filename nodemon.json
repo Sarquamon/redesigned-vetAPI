@@ -1,5 +1,6 @@
 {
 	"env": {
-		"MONGODB_ATLAS_PWD": "VZUQAaTr9wBgU5Jx"
+		"MONGODB_ATLAS_PWD": "VZUQAaTr9wBgU5Jx",
+		"JWT_KEY": "secretKey"
 	}
 }
