@@ -1,12 +1,43 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const Product = require("../../models/products");
+const multer = require("multer");
 
 const router = express.Router();
 
+const storage = multer.diskStorage({
+	destination: function(req, file, cb) {
+		cb(null, "./uploads/");
+	},
+	filename: function(req, file, cb) {
+		cb(
+			null,
+			`${new Date().toISOString().replace(/:/g, "-")}${file.originalname}`
+		);
+	}
+});
+
+const fileFilter = (req, file, cb) => {
+	if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+		cb(null, true);
+	} else {
+		cb(null, false);
+	}
+};
+
+const upload = multer({
+	storage: storage,
+	// dest: "uploads/",
+	limits: {
+		fileSize: 1024 * 1024 * 5
+	},
+	fileFilter: fileFilter
+});
+
+// Get all products from database
 router.get("/", (req, res, next) => {
 	Product.find()
-		.select("productName productPrice _id")
+		.select("productName productPrice _id productImage")
 		.exec()
 		.then(result => {
 			if (result) {
@@ -15,9 +46,10 @@ router.get("/", (req, res, next) => {
 						count: result.length,
 						products: result.map(doc => {
 							return {
+								_id: doc._id,
 								productName: doc.productName,
 								productPrice: doc.productPrice,
-								_id: doc._id,
+								productImage: doc.productImage,
 								request: {
 									type: "GET",
 									url: `http://localhost:2000/product/${doc._id}`
@@ -44,13 +76,16 @@ router.get("/", (req, res, next) => {
 		});
 });
 
-router.post("/", (req, res, next) => {
+// Store data to database
+router.post("/", upload.single("productImage"), (req, res, next) => {
 	const {productName, productPrice} = req.body;
+	console.log(req.file);
 
 	const product = new Product({
 		_id: new mongoose.Types.ObjectId(),
 		productName: productName,
-		productPrice: productPrice
+		productPrice: productPrice,
+		productImage: req.file.path
 	});
 
 	product
@@ -76,12 +111,13 @@ router.post("/", (req, res, next) => {
 		});
 });
 
+// Get Specific product from database
 router.get("/:productId", (req, res, next) => {
 	const {productId} = req.params;
 
 	if (productId) {
 		Product.findById(productId)
-			.select("productName productPrice _id")
+			.select("productName productPrice _id productImage")
 			.exec()
 			.then(result => {
 				if (result) {
@@ -108,6 +144,7 @@ router.get("/:productId", (req, res, next) => {
 	}
 });
 
+// Delete specific product from database
 router.delete("/:productId", (req, res, next) => {
 	const {productId} = req.params;
 
@@ -133,6 +170,7 @@ router.delete("/:productId", (req, res, next) => {
 	}
 });
 
+// Update specific product from database
 router.patch("/:productId", (req, res, next) => {
 	const {productId} = req.params;
 	if (productId) {
