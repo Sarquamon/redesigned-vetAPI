@@ -6,12 +6,27 @@ const router = express.Router();
 
 router.get("/", (req, res, next) => {
 	Product.find()
+		.select("productName productPrice _id")
 		.exec()
 		.then(result => {
 			if (result) {
 				if (result.length >= 0) {
-					console.log(`Success! ${result}`);
-					res.status(200).json(result);
+					const response = {
+						count: result.length,
+						products: result.map(doc => {
+							return {
+								productName: doc.productName,
+								productPrice: doc.productPrice,
+								_id: doc._id,
+								request: {
+									type: "GET",
+									url: `http://localhost:2000/product/${doc._id}`
+								}
+							};
+						})
+					};
+					console.log(`Success! ${response}`);
+					res.status(200).json(response);
 				} else {
 					console.log(`No entries! ${result}`);
 					res
@@ -43,8 +58,16 @@ router.post("/", (req, res, next) => {
 		.then(result => {
 			console.log(`Success! ${result}`);
 			res.status(201).json({
-				message: "You're in POST method on /products",
-				createdProduct: result
+				message: "Product created sucessfully",
+				createdProduct: {
+					productName: result.productName,
+					productPrice: result.productPrice,
+					_id: result._id,
+					request: {
+						type: "GET",
+						url: `http://localhost:2000/product/${result._id}`
+					}
+				}
 			});
 		})
 		.catch(err => {
@@ -58,11 +81,18 @@ router.get("/:productId", (req, res, next) => {
 
 	if (productId) {
 		Product.findById(productId)
+			.select("productName productPrice _id")
 			.exec()
 			.then(result => {
 				if (result) {
 					console.log(`Success! ${result}`);
-					res.status(200).json(result);
+					res.status(200).json({
+						product: result,
+						request: {
+							type: "GET",
+							url: `http://localhost:2000/product`
+						}
+					});
 				} else {
 					console.log(`Not found! ${result}`);
 					res.status(404).json({message: "Not found"});
@@ -117,7 +147,13 @@ router.patch("/:productId", (req, res, next) => {
 			.then(result => {
 				if (result) {
 					console.log(`Success! ${result}`);
-					res.status(200).json(result);
+					res.status(200).json({
+						message: "Product Updated",
+						request: {
+							type: "GET",
+							url: `http://localhost:2000/product/${productId}`
+						}
+					});
 				} else {
 					console.log(`Not found! ${productId}`);
 					res.status(404).json({message: `Not found! ${productId}`});
