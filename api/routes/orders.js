@@ -1,11 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
 
-const Order = require("../../models/order");
-const Product = require("../../models/products");
 const router = express.Router();
 
-router.get("/", (req, res, next) => {
+const Order = require("../../models/order");
+const Product = require("../../models/products");
+const checkAuth = require("../middleware/check-auth");
+
+router.get("/", checkAuth, (req, res, next) => {
 	Order.find()
 		.select("_id product quantity")
 		.populate("product", "productName productPrice")
@@ -37,7 +39,7 @@ router.get("/", (req, res, next) => {
 		});
 });
 
-router.post("/", (req, res, next) => {
+router.post("/", checkAuth, (req, res, next) => {
 	const {orderQuantity, productId} = req.body;
 	Product.findById(productId)
 		.then(product => {
@@ -79,7 +81,7 @@ router.post("/", (req, res, next) => {
 		});
 });
 
-router.get("/:orderId", (req, res, next) => {
+router.get("/:orderId", checkAuth, (req, res, next) => {
 	const {orderId} = req.params;
 
 	Order.findById(orderId)

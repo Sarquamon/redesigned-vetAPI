@@ -1,7 +1,9 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const Product = require("../../models/products");
 const multer = require("multer");
+
+const checkAuth = require("../middleware/check-auth");
+const Product = require("../../models/products");
 
 const router = express.Router();
 
@@ -77,7 +79,7 @@ router.get("/", (req, res, next) => {
 });
 
 // Store data to database
-router.post("/", upload.single("productImage"), (req, res, next) => {
+router.post("/", checkAuth, upload.single("productImage"), (req, res, next) => {
 	const {productName, productPrice} = req.body;
 	console.log(req.file);
 
@@ -145,7 +147,7 @@ router.get("/:productId", (req, res, next) => {
 });
 
 // Delete specific product from database
-router.delete("/:productId", (req, res, next) => {
+router.delete("/:productId", checkAuth, (req, res, next) => {
 	const {productId} = req.params;
 
 	if (productId) {
@@ -171,7 +173,7 @@ router.delete("/:productId", (req, res, next) => {
 });
 
 // Update specific product from database
-router.patch("/:productId", (req, res, next) => {
+router.patch("/:productId", checkAuth, (req, res, next) => {
 	const {productId} = req.params;
 	if (productId) {
 		const updateOps = {};
