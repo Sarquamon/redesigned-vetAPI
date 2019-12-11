@@ -9,8 +9,11 @@ router.get("/", (req, res, next) => {
 });
 
 router.post("/", (req, res, next) => {
+	const {productName, productPrice} = req.body;
 	res.status(201).json({
-		message: "You're in POST method on /products"
+		message: "You're in POST method on /products",
+		productName: `This is the product name: ${productName}`,
+		productPrice: `This is the product price: ${productPrice}`
 	});
 });
 
