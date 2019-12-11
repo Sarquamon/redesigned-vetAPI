@@ -1,0 +1,23 @@
+{
+	"name": "vetrestapi",
+	"version": "1.0.0",
+	"description": "A RESTful API for handleing request for mineriaappEcommerce",
+	"main": "index.js",
+	"scripts": {
+		"start": "nodemon server.js",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [
+		"Rest",
+		"SPA",
+		"API"
+	],
+	"author": "Salomón Piña",
+	"license": "ISC",
+	"dependencies": {
+		"express": "^4.17.1"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.1"
+	}
+}
