@@ -2,9 +2,24 @@ const express = require("express");
 const morgan = require("morgan");
 const app = express();
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 
 const productRoutes = require("./api/routes/products");
 const orderRoutes = require("./api/routes/orders");
+
+const MONGODBURL = `mongodb+srv://admin:${process.env.MONGODB_ATLAS_PWD}@developmentapps-lmcx2.mongodb.net/test?retryWrites=true&w=majority`;
+
+mongoose.connect(
+	MONGODBURL,
+	{useNewUrlParser: true, useUnifiedTopology: true},
+	err => {
+		if (!err) {
+			console.log("Succesful MongoDB connection");
+		} else {
+			console.log(`Connection error ${err}`);
+		}
+	}
+);
 
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({extended: false}));
