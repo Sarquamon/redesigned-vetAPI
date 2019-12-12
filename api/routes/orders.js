@@ -33,7 +33,87 @@ router.post("/", checkAuth, (req, res, next) => {
 	const productArray = [];
 
 	if (orderedProducts.length > 1) {
-		console.log("Mayor a 2");
+		const productId = orderedProducts[0].productId;
+		const productQuantity = orderedProducts[0].productQuantity;
+		// console.log(productId);
+		// console.log(productQuantity);
+		Product.findById(productId)
+			.select("_id productName productPrice productImage")
+			.then(result => {
+				if (result) {
+					// console.log(`Success! ${result}`);
+
+					const product = {
+						product: result,
+						quantity: productQuantity
+					};
+
+					productArray.push(product);
+
+					// console.log(productArray);
+					// console.log(product);
+
+					const order = new Order({
+						_id: mongoose.Types.ObjectId(),
+						products: productArray[0]
+					});
+					return order.save();
+				} else {
+					console.log(`Error! Product not found ${err}`);
+					res.status(404).json({
+						message: `Error! Product not found ${err}`
+					});
+				}
+			})
+			.then(result => {
+				if (result) {
+					// console.log(`Success! ${result._id}`);
+					for (let i = 1; i < orderedProducts.length; i++) {
+						console.log(`Posision: ${i} valor: ${orderedProducts[i]}`);
+
+						const product = {
+							product: orderedProducts[i].productId,
+							quantity: orderedProducts[i].productQuantity
+						};
+
+						Order.findByIdAndUpdate(
+							{_id: result._id},
+							{$push: {products: product}},
+							{new: true, useFindAndModify: false}
+						)
+							.then(finalResult => {
+								if (finalResult) {
+									console.log(`Success ${finalResult}`);
+									res.status(201).json({
+										message: "Order created"
+									});
+								} else {
+									console.log(`Error! ${err} `);
+									res.status(500).json({
+										message: `Error! ${err}`
+									});
+								}
+							})
+							.catch(err => {
+								console.log(`Error! ${err} `);
+								res.status(500).json({
+									message: `Error! ${err}`
+								});
+							});
+					}
+				} else {
+					console.log(`Error! ${err} `);
+					res.status(500).json({
+						message: `Error! ${err}`
+					});
+				}
+			})
+			.catch(err => {
+				console.log(`Error! ${err} `);
+				res.status(500).json({
+					message: `Error! ${err}`
+				});
+			});
 	} else {
 		const productId = orderedProducts[0].productId;
 		const productQuantity = orderedProducts[0].productQuantity;
@@ -51,8 +131,9 @@ router.post("/", checkAuth, (req, res, next) => {
 					};
 
 					productArray.push(product);
-					console.log(productArray);
-					console.log(product);
+
+					// console.log(productArray);
+					// console.log(product);
 
 					const order = new Order({
 						_id: mongoose.Types.ObjectId(),
