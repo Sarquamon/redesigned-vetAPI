@@ -12,7 +12,7 @@ const MONGODBURL = `mongodb+srv://admin:${process.env.MONGODB_ATLAS_PWD}@develop
 
 mongoose.connect(
 	MONGODBURL,
-	{useNewUrlParser: true, useUnifiedTopology: true},
+	{useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true},
 	err => {
 		if (!err) {
 			console.log("Succesful MongoDB connection");
