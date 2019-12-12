@@ -40,45 +40,72 @@ router.get("/", checkAuth, (req, res, next) => {
 });
 
 router.post("/", checkAuth, (req, res, next) => {
-	const {orderQuantity, productId} = req.body;
-	Product.findById(productId)
-		.then(product => {
-			if (product) {
-				const order = new Order({
-					_id: mongoose.Types.ObjectId(),
-					quantity: orderQuantity,
-					product: productId
-				});
-				return order.save();
-			} else {
-				console.log(`Error! Null product`);
-				res.status(404).json({
-					message: `Error! Null product`
-				});
-			}
-		})
-		.then(result => {
-			console.log(`Success! ${result}`);
-			res.status(201).json({
-				message: "Order created",
-				createdOrder: {
-					_id: result._id,
-					product: result.product,
-					quantity: result.quantity
-				},
-				request: {
-					type: "GET",
-					url: `http://localhost:2000/order/${result._id}`
+	const {orderedProducts} = req.body;
+
+	const productArray = [];
+
+	if (orderedProducts.length > 1) {
+		console.log("Mayor a 2");
+	} else {
+		const productId = orderedProducts[0].productId;
+		const productQuantity = orderedProducts[0].productQuantity;
+		// console.log(productId);
+		// console.log(productQuantity);
+		Product.findById(productId)
+			.select("_id productName productPrice productImage")
+			.then(result => {
+				if (result) {
+					// console.log(`Success! ${result}`);
+
+					const product = {
+						product: result,
+						quantity: productQuantity
+					};
+
+					productArray.push(product);
+					console.log(productArray);
+					console.log(product);
+
+					const order = new Order({
+						_id: mongoose.Types.ObjectId(),
+						products: productArray[0]
+					});
+					return order.save();
+				} else {
+					console.log(`Error! Product not found ${err}`);
+					res.status(404).json({
+						message: `Error! Product not found ${err}`
+					});
 				}
+			})
+			.then(result => {
+				if (result) {
+					// console.log(`Success! ${result}`);
+					// console.log(`product: ${result.products[0].product}`);
+					// console.log(`Quantity: ${result.products[0].quantity}`);
+
+					res.status(201).json({
+						message: "Order created",
+						createdOrder: {
+							_id: result._id,
+							product: result.products[0].product,
+							quantity: result.products[0].quantity
+						}
+					});
+				} else {
+					console.log(`Error! ${err} `);
+					res.status(500).json({
+						message: `Error! ${err}`
+					});
+				}
+			})
+			.catch(err => {
+				console.log(`Error! ${err} `);
+				res.status(500).json({
+					message: `Error! ${err}`
+				});
 			});
-		})
-		.catch(err => {
-			console.log(`Error! ${err}`);
-			res.status(404).json({
-				message: `Error!`,
-				error: err
-			});
-		});
+	}
 });
 
 router.get("/:orderId", checkAuth, (req, res, next) => {
