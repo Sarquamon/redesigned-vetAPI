@@ -27,6 +27,67 @@ router.get("/", checkAuth, (req, res, next) => {
 		});
 });
 
+router.get("/checkSimilarProd", checkAuth, (req, res, next) => {
+	const {activeProduct} = req.body;
+	const elementWithSameProd = [];
+	const possibleProducts = [];
+
+	Order.find()
+		.select("_id products")
+		.populate("products.product")
+		.exec()
+		.then(result => {
+			if (result) {
+				const sameProductsArray = [];
+				result.forEach(element => {
+					if (element.products.length > 1) {
+						sameProductsArray.push(element.products);
+						// console.log(`elemento: ${element.products}`);
+					}
+				});
+
+				//stores order which contains same product as listed
+				sameProductsArray.forEach(element => {
+					for (let i = 0; i < element.length; i++) {
+						if (element[i].product._id == activeProduct) {
+							elementWithSameProd.push(element);
+						}
+					}
+				});
+
+				//Stores the different products that is inside the order which contains the same product
+				//(stores all other products but not the same as listed)
+				elementWithSameProd.forEach(possibleProduct => {
+					// console.log(`possibleProduct: ${possibleProduct}`);
+					for (let i = 0; i < possibleProduct.length; i++) {
+						if (!(possibleProduct[i].product._id == activeProduct)) {
+							// console.log("no es igual");
+							// console.log(
+							// 	`Diferent Product id: ${possibleProduct[i].product._id}`
+							// );
+
+							possibleProducts.push(possibleProduct[i].product._id);
+						} else {
+							// console.log("es igual");
+						}
+					}
+				});
+
+				res.status(200).json({
+					message:
+						"This are the different products in the orders that contain the same product",
+					possibleProducts: possibleProducts
+				});
+			}
+		})
+		.catch(err => {
+			console.log(`Error! ${err} `);
+			res.status(500).json({
+				message: `Error! ${err}`
+			});
+		});
+});
+
 router.post("/", checkAuth, (req, res, next) => {
 	const {orderedProducts} = req.body;
 
