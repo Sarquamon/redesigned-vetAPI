@@ -29,8 +29,10 @@ router.get("/", checkAuth, (req, res, next) => {
 
 router.get("/checkSimilarProd", checkAuth, (req, res, next) => {
 	const {activeProduct} = req.body;
+	// const products = [];
 	const elementWithSameProd = [];
 	const possibleProducts = [];
+	const finalPossibleProducts = [];
 
 	Order.find()
 		.select("_id products")
@@ -47,10 +49,10 @@ router.get("/checkSimilarProd", checkAuth, (req, res, next) => {
 				});
 
 				//stores order which contains same product as listed
-				sameProductsArray.forEach(element => {
-					for (let i = 0; i < element.length; i++) {
-						if (element[i].product._id == activeProduct) {
-							elementWithSameProd.push(element);
+				sameProductsArray.forEach(order => {
+					for (let i = 0; i < order.length; i++) {
+						if (order[i].product._id == activeProduct) {
+							elementWithSameProd.push(order);
 						}
 					}
 				});
@@ -67,23 +69,62 @@ router.get("/checkSimilarProd", checkAuth, (req, res, next) => {
 							// );
 
 							possibleProducts.push(possibleProduct[i].product._id);
-						} else {
-							// console.log("es igual");
 						}
 					}
 				});
 
-				res.status(200).json({
-					message:
-						"This are the different products in the orders that contain the same product",
-					possibleProducts: possibleProducts
-				});
+				Product.find()
+					.select("productName productPrice _id productImage")
+					.exec()
+					.then(result => {
+						if (result) {
+							if (result.length >= 0) {
+								result.forEach(product => {
+									for (let i = 0; i < possibleProducts.length; i++) {
+										if (
+											product._id.toString() ===
+											possibleProducts[i]._id.toString()
+										) {
+											finalPossibleProducts.push(product);
+										}
+									}
+								});
+								console.log(`Success! ${finalPossibleProducts}`);
+								res.status(200).json({
+									message: `Success!`,
+									count: finalPossibleProducts.length,
+									products: finalPossibleProducts
+								});
+							} else {
+								console.log(`No entries! ${result}`);
+								res
+									.status(404)
+									.json({message: `No entries have been found ${result}`});
+							}
+						} else {
+							console.log(`Not found! ${result}`);
+							res.status(404).json({
+								message: `Not found! ${result}`
+							});
+						}
+					})
+					.catch(err => {
+						console.log(`Error! ${err}`);
+						res.status(500).json({
+							message: `Error!`,
+							error: err
+						});
+					});
+			} else {
+				console.log(`No order has been found! ${result}`);
+				res.status(404).json({message: `Not  found! ${result}`});
 			}
 		})
 		.catch(err => {
 			console.log(`Error! ${err} `);
 			res.status(500).json({
-				message: `Error! ${err}`
+				message: `Error!`,
+				Error: err
 			});
 		});
 });
