@@ -27,9 +27,8 @@ router.get("/", checkAuth, (req, res, next) => {
 		});
 });
 
-router.get("/checkSimilarProd", checkAuth, (req, res, next) => {
-	const {activeProduct} = req.body;
-	// const products = [];
+router.get("/checkSimilarProd/:activeProduct", checkAuth, (req, res, next) => {
+	const {activeProduct} = req.params;
 	const elementWithSameProd = [];
 	const possibleProducts = [];
 	const finalPossibleProducts = [];
@@ -63,11 +62,6 @@ router.get("/checkSimilarProd", checkAuth, (req, res, next) => {
 					// console.log(`possibleProduct: ${possibleProduct}`);
 					for (let i = 0; i < possibleProduct.length; i++) {
 						if (!(possibleProduct[i].product._id == activeProduct)) {
-							// console.log("no es igual");
-							// console.log(
-							// 	`Diferent Product id: ${possibleProduct[i].product._id}`
-							// );
-
 							possibleProducts.push(possibleProduct[i].product._id);
 						}
 					}
