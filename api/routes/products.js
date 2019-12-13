@@ -29,7 +29,6 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
 	storage: storage,
-	// dest: "uploads/",
 	limits: {
 		fileSize: 1024 * 1024 * 5
 	},
@@ -51,7 +50,7 @@ router.get("/", (req, res, next) => {
 								_id: doc._id,
 								productName: doc.productName,
 								productPrice: doc.productPrice,
-								productImage: doc.productImage,
+								productImage: `http://localhost:2000/${doc.productImage}`,
 								request: {
 									type: "GET",
 									url: `http://localhost:2000/product/${doc._id}`
@@ -99,6 +98,7 @@ router.post("/", checkAuth, upload.single("productImage"), (req, res, next) => {
 				createdProduct: {
 					productName: result.productName,
 					productPrice: result.productPrice,
+					productImage: result.productImage,
 					_id: result._id,
 					request: {
 						type: "GET",
@@ -124,7 +124,7 @@ router.get("/searchName/:productName", (req, res, next) => {
 				console.log(`Success! ${result}`);
 				res.status(200).json({
 					message: "Success!",
-					productName: result
+					products: result
 				});
 			})
 			.catch(err => {
@@ -153,7 +153,13 @@ router.get("/:productId", (req, res, next) => {
 				if (result) {
 					console.log(`Success! ${result}`);
 					res.status(200).json({
-						product: result,
+						// product: result,
+						product: {
+							_id: result._id,
+							productName: result.productName,
+							productPrice: result.productPrice,
+							productImage: `http://localhost:2000/${result.productImage}`
+						},
 						request: {
 							type: "GET",
 							url: `http://localhost:2000/product`
