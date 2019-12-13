@@ -110,7 +110,7 @@ router.post("/login", (req, res, next) => {
 		});
 });
 
-router.delete("/userId", (req, res, next) => {
+router.delete("/:userId", (req, res, next) => {
 	const {userId} = req.params;
 
 	if (userId) {
