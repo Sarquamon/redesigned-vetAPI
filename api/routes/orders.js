@@ -27,7 +27,7 @@ router.get("/", checkAuth, (req, res, next) => {
 		});
 });
 
-router.get("/checkSimilarProd/:activeProduct", checkAuth, (req, res, next) => {
+router.get("/checkSimilarProd/:activeProduct", (req, res, next) => {
 	const {activeProduct} = req.params;
 	const elementWithSameProd = [];
 	const possibleProducts = [];
@@ -181,7 +181,8 @@ router.post("/", checkAuth, (req, res, next) => {
 								if (finalResult) {
 									console.log(`Success ${finalResult}`);
 									res.status(201).json({
-										message: "Order created"
+										message: "Order created",
+										_id: finalResult._id
 									});
 								} else {
 									console.log(`Error! ${err} `);
