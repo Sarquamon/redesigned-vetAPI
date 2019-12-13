@@ -7,4 +7,17 @@ const productSchema = mongoose.Schema({
 	productImage: {type: String, required: true}
 });
 
+productSchema.index(
+	{
+		productName: "text",
+		productDesc: "text"
+	},
+	{
+		weights: {
+			productName: 5,
+			productDesc: 1
+		}
+	}
+);
+
 module.exports = mongoose.model("Product", productSchema);

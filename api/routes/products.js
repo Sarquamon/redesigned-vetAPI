@@ -113,7 +113,35 @@ router.post("/", checkAuth, upload.single("productImage"), (req, res, next) => {
 		});
 });
 
-// Get Specific product from database
+//Get all products from database with the given name
+router.get("/searchName/:productName", (req, res, next) => {
+	const {productName} = req.params;
+	if (productName) {
+		Product.find({$text: {$search: productName.toString()}})
+			.select("productName productPrice productImage")
+			.exec()
+			.then(result => {
+				console.log(`Success! ${result}`);
+				res.status(200).json({
+					message: "Success!",
+					productName: result
+				});
+			})
+			.catch(err => {
+				console.log(`Error ${err}`);
+				res.status(404).json({
+					message: "Product not found"
+				});
+			});
+	} else {
+		console.log(`Error! Empty product name`);
+		res.status(404).json({
+			message: "Error! Empty product name"
+		});
+	}
+});
+
+// Get Specific product from database using ID
 router.get("/:productId", (req, res, next) => {
 	const {productId} = req.params;
 
