@@ -38,7 +38,7 @@ const upload = multer({
 // Get all products from database
 router.get("/", (req, res, next) => {
 	Product.find()
-		.select("productName productPrice _id productImage")
+		.select("productName productPrice _id productImage productCat")
 		.exec()
 		.then(result => {
 			if (result) {
@@ -51,6 +51,7 @@ router.get("/", (req, res, next) => {
 								productName: doc.productName,
 								productPrice: doc.productPrice,
 								productImage: `http://localhost:2000/${doc.productImage}`,
+								productCat: doc.productCat,
 								request: {
 									type: "GET",
 									url: `http://localhost:2000/product/${doc._id}`
@@ -124,7 +125,27 @@ router.get("/searchName/:productName", (req, res, next) => {
 				console.log(`Success! ${result}`);
 				res.status(200).json({
 					message: "Success!",
-					products: result
+					// products: result
+					products: result.map(doc => {
+						return {
+							_id: doc._id,
+							productName: doc.productName,
+							productPrice: doc.productPrice,
+							productImage: `http://localhost:2000/${doc.productImage}`,
+							request: {
+								type: "GET",
+								url: `http://localhost:2000/product/${doc._id}`
+							}
+						};
+					})
+					// products: [
+					// 	{
+					// 		_id: result[0]._id,
+					// 		productName: result[0].productName,
+					// 		productPrice: result[0].productPrice,
+					// 		productImage: `http://localhost:2000/${result[0].productImage}`
+					// 	}
+					// ]
 				});
 			})
 			.catch(err => {
