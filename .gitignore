@@ -1,3 +1,4 @@
 /node_modules
 /uploads
 /api/routes/prueba.json
+.nodemon.json
